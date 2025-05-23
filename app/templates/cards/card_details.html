@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Tarjeta - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalle de Tarjeta #{{ card.tarjetaId }}</h1>
+        <a href="{{ url_for('cards.mis_tarjetas') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver a Mis Tarjetas
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Información de la Tarjeta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Número:</strong> **** **** **** {{ card.tarjetaNumero[-4:] }}</p>
+                            <p>
+                                <strong>Estado:</strong>
+                                <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.tarjetaEstado }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Cupo Total:</strong> ${{ "%.2f"|format(card.tarjetaCupoTotal) }}</p>
+                            <p><strong>Cupo Disponible:</strong> ${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</p>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-3">Uso del Cupo</h6>
+                    <div class="progress mb-3" style="height: 25px;">
+                        {% set porcentaje_usado = ((card.tarjetaCupoTotal - card.tarjetaCupoDisponible) / card.tarjetaCupoTotal * 100)|round %}
+                        <div class="progress-bar {% if porcentaje_usado > 80 %}bg-danger{% elif porcentaje_usado > 60 %}bg-warning{% else %}bg-success{% endif %}"
+                             role="progressbar"
+                             style="width: {{ porcentaje_usado }}%"
+                             aria-valuenow="{{ porcentaje_usado }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                            {{ porcentaje_usado }}% Utilizado
+                        </div>
+                    </div>
+                    <p class="text-muted text-center">
+                        <small>Cupo Utilizado: ${{ "%.2f"|format(card.tarjetaCupoTotal - card.tarjetaCupoDisponible) }}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

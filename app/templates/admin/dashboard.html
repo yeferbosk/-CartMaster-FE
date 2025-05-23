@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Clientes</h5>
+                    <h2 class="card-text">{{ clients|length }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tarjetas</h5>
+                    <h2 class="card-text">{{ cards|length }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tarjetas Activas</h5>
+                    <h2 class="card-text">{{ cards|selectattr('tarjetaEstado', 'equalto', 'ACTIVO')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tarjetas Bloqueadas</h5>
+                    <h2 class="card-text">{{ cards|selectattr('tarjetaEstado', 'equalto', 'BLOQUEADO')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Últimos Clientes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for client in clients[:5] %}
+                        <a href="{{ url_for('admin.listar_clientes') }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ client.clienteNombre }}</h6>
+                                <small>ID: {{ client.clienteId }}</small>
+                            </div>
+                            <p class="mb-1">{{ client.clienteEmail }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Últimas Tarjetas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for card in cards[:5] %}
+                        <a href="{{ url_for('admin.ver_tarjeta', card_id=card.tarjetaId) }}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">Tarjeta #{{ card.tarjetaId }}</h6>
+                                <small class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.tarjetaEstado }}
+                                </small>
+                            </div>
+                            <p class="mb-1">Cupo: ${{ "%.2f"|format(card.tarjetaCupoTotal) }}</p>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

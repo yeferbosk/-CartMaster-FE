@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Tarjeta - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalle de Tarjeta #{{ card.tarjetaId }}</h1>
+        <div>
+            <a href="{{ url_for('admin.editar_tarjeta', card_id=card.tarjetaId) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Eliminar
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Información de la Tarjeta</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>ID:</strong> {{ card.tarjetaId }}</p>
+                    <p><strong>Número:</strong> **** **** **** {{ card.tarjetaNumero[-4:] }}</p>
+                    <p><strong>Estado:</strong> 
+                        <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                            {{ card.tarjetaEstado }}
+                        </span>
+                    </p>
+                    <p><strong>Cupo Total:</strong> ${{ "%.2f"|format(card.tarjetaCupoTotal) }}</p>
+                    <p><strong>Cupo Disponible:</strong> ${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</p>
+                    <p><strong>Cupo Utilizado:</strong> ${{ "%.2f"|format(card.tarjetaCupoTotal - card.tarjetaCupoDisponible) }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Información del Cliente</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nombre:</strong> {{ card.clienteNombre }}</p>
+                    <p><strong>Email:</strong> {{ card.clienteEmail }}</p>
+                    <p><strong>Teléfono:</strong> {{ card.clienteTelefono }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro de que desea eliminar la tarjeta #{{ card.tarjetaId }}?</p>
+                <p class="text-danger">Esta acción cambiará el estado de la tarjeta a INACTIVO.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('admin.eliminar_tarjeta', card_id=card.tarjetaId) }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

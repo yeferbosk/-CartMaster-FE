@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Tarjetas - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Gestión de Tarjetas</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Número</th>
+                            <th>Estado</th>
+                            <th>Cupo Total</th>
+                            <th>Cupo Disponible</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                        <tr>
+                            <td>{{ card.tarjetaId }}</td>
+                            <td>{{ card.clienteNombre }}</td>
+                            <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.tarjetaEstado }}
+                                </span>
+                            </td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{{ url_for('admin.ver_tarjeta', card_id=card.tarjetaId) }}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('admin.editar_tarjeta', card_id=card.tarjetaId) }}" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-danger btn-sm" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ card.tarjetaId }}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal de confirmación de eliminación -->
+                                <div class="modal fade" id="deleteModal{{ card.tarjetaId }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Eliminación</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>¿Está seguro de que desea eliminar la tarjeta #{{ card.tarjetaId }}?</p>
+                                                <p class="text-danger">Esta acción cambiará el estado de la tarjeta a INACTIVO.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form action="{{ url_for('admin.eliminar_tarjeta', card_id=card.tarjetaId) }}" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

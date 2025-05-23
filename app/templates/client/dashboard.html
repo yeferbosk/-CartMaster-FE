@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Dashboard - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Mi Dashboard</h1>
+    
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Total Tarjetas</h5>
+                    <h2 class="card-text">{{ cards|length }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Tarjetas Activas</h5>
+                    <h2 class="card-text">{{ cards|selectattr('tarjetaEstado', 'equalto', 'ACTIVO')|list|length }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Cupo Total Disponible</h5>
+                    <h2 class="card-text">${{ "%.2f"|format(cards|sum(attribute='tarjetaCupoDisponible')) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Mis Tarjetas</h5>
+        </div>
+        <div class="card-body">
+            {% if cards %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Estado</th>
+                            <th>Cupo Total</th>
+                            <th>Cupo Disponible</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                        <tr>
+                            <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.tarjetaEstado }}
+                                </span>
+                            </td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            <td>
+                                <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                No tienes tarjetas registradas.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

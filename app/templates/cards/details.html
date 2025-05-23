@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Card Details - CartMaster{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Card Details</h3>
+                    <a href="{{ url_for('client.dashboard') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="card-title">
+                            <i class="fas fa-credit-card"></i>
+                            {{ card.tarjeta_franquicia }}
+                        </h5>
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            **** **** **** {{ card.tarjeta_numero[-4:] }}
+                        </h6>
+                        <p><strong>Expiry Date:</strong> {{ card.tarjeta_fecha_vencimiento }}</p>
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="badge {% if card.tarjeta_estado == 'ACTIVO' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ card.tarjeta_estado }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Credit Limits</h5>
+                                <div class="progress mb-3">
+                                    {% set percentage = (card.tarjeta_cupo_utilizado / card.tarjeta_cupo_total * 100) | round %}
+                                    <div class="progress-bar {% if percentage > 80 %}bg-danger{% elif percentage > 60 %}bg-warning{% else %}bg-success{% endif %}"
+                                         role="progressbar"
+                                         style="width: {{ percentage }}%"
+                                         aria-valuenow="{{ percentage }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                        {{ percentage }}%
+                                    </div>
+                                </div>
+                                <p class="mb-1">
+                                    <strong>Total Limit:</strong>
+                                    ${{ "%.2f"|format(card.tarjeta_cupo_total) }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Available Credit:</strong>
+                                    ${{ "%.2f"|format(card.tarjeta_cupo_disponible) }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Used Credit:</strong>
+                                    ${{ "%.2f"|format(card.tarjeta_cupo_utilizado) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if current_user.is_admin %}
+                <div class="mt-4">
+                    <h5>Administrative Actions</h5>
+                    <form method="POST" action="{{ url_for('cards.update_card_status', card_id=card.tarjeta_id) }}"
+                          class="d-inline">
+                        <select name="status" class="form-select d-inline-block w-auto me-2">
+                            <option value="ACTIVO" {% if card.tarjeta_estado == 'ACTIVO' %}selected{% endif %}>
+                                Active
+                            </option>
+                            <option value="BLOQUEADO" {% if card.tarjeta_estado == 'BLOQUEADO' %}selected{% endif %}>
+                                Blocked
+                            </option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
