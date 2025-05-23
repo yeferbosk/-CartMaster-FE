@@ -29,7 +29,7 @@
             <div class="card bg-info text-white">
                 <div class="card-body">
                     <h5 class="card-title">Tarjetas Activas</h5>
-                    <h2 class="card-text">{{ cards|selectattr('tarjetaEstado', 'equalto', 'ACTIVO')|list|length }}</h2>
+                    <h2 class="card-text">{{ cards|selectattr('estado', 'defined')|selectattr('estado', 'equalto', 'ACTIVO')|list|length }}</h2>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
             <div class="card bg-warning text-white">
                 <div class="card-body">
                     <h5 class="card-title">Tarjetas Bloqueadas</h5>
-                    <h2 class="card-text">{{ cards|selectattr('tarjetaEstado', 'equalto', 'BLOQUEADO')|list|length }}</h2>
+                    <h2 class="card-text">{{ cards|selectattr('estado', 'defined')|selectattr('estado', 'equalto', 'INACTIVO')|list|length }}</h2>
                 </div>
             </div>
         </div>
@@ -55,10 +55,10 @@
                         {% for client in clients[:5] %}
                         <a href="{{ url_for('admin.listar_clientes') }}" class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">{{ client.clienteNombre }}</h6>
-                                <small>ID: {{ client.clienteId }}</small>
+                                <h6 class="mb-1">{{ client.nombre }}</h6>
+                                <small>ID: {{ client.id }}</small>
                             </div>
-                            <p class="mb-1">{{ client.clienteEmail }}</p>
+                            <p class="mb-1">{{ client.correo }}</p>
                         </a>
                         {% endfor %}
                     </div>
@@ -77,11 +77,17 @@
                         <a href="{{ url_for('admin.ver_tarjeta', card_id=card.tarjetaId) }}" class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
                                 <h6 class="mb-1">Tarjeta #{{ card.tarjetaId }}</h6>
-                                <small class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
-                                    {{ card.tarjetaEstado }}
+                                <small class="badge bg-{{ 'success' if (card.estado or card.tarjetaEstado) == 'ACTIVO' else 'warning' }}">
+                                    {{ card.estado or card.tarjetaEstado }}
                                 </small>
                             </div>
-                            <p class="mb-1">Cupo: ${{ "%.2f"|format(card.tarjetaCupoTotal) }}</p>
+                            <p class="mb-1">
+                                Cupo: ${{ "%.2f"|format(card.cupoTotal or card.tarjetaCupoTotal) }}
+                                {% if card.cliente %}
+                                <br>
+                                <small class="text-muted">Cliente: {{ card.cliente.nombre }}</small>
+                                {% endif %}
+                            </p>
                         </a>
                         {% endfor %}
                     </div>

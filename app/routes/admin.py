@@ -68,8 +68,18 @@ for client in MOCK_CLIENTS:
 @admin_required
 def dashboard():
     try:
+        # Obtener tarjetas con información de clientes
         cards = APIService.get_cards_with_clients()
-        clients = APIService.get_all_clients()
+        
+        # Obtener lista de clientes únicos de las tarjetas
+        clients = []
+        client_ids = set()
+        
+        for card in cards:
+            if card.get('cliente') and card['cliente']['id'] not in client_ids:
+                clients.append(card['cliente'])
+                client_ids.add(card['cliente']['id'])
+        
         return render_template('admin/dashboard.html', cards=cards, clients=clients)
     except Exception as e:
         flash(f'Error al cargar el dashboard: {str(e)}', 'danger')
@@ -126,12 +136,15 @@ def editar_tarjeta(card_id):
     if request.method == 'POST':
         try:
             data = {
-                'tarjetaEstado': request.form['estado'],
-                'tarjetaCupoTotal': float(request.form['cupo_total']),
-                'tarjetaCupoDisponible': float(request.form['cupo_disponible'])
+                'estado': request.form['estado'],
+                'cupo_total': float(request.form['cupo_total']),
+                'cupo_disponible': float(request.form['cupo_disponible'])
             }
-            APIService.update_card(card_id, data)
-            flash('Tarjeta actualizada correctamente', 'success')
+            result = APIService.update_card(card_id, data)
+            if result:
+                flash('Tarjeta actualizada correctamente', 'success')
+            else:
+                flash('Error al actualizar la tarjeta', 'danger')
             return redirect(url_for('admin.ver_tarjeta', card_id=card_id))
         except Exception as e:
             flash(f'Error al actualizar la tarjeta: {str(e)}', 'danger')

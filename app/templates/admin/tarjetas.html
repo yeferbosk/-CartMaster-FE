@@ -27,15 +27,15 @@
                         {% for card in cards %}
                         <tr>
                             <td>{{ card.tarjetaId }}</td>
-                            <td>{{ card.clienteNombre }}</td>
-                            <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            <td>{{ card.cliente.nombre if card.cliente else 'N/A' }}</td>
+                            <td>**** **** **** {{ card.numeroTarjeta[-4:] }}</td>
                             <td>
-                                <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
-                                    {{ card.tarjetaEstado }}
+                                <span class="badge bg-{{ 'success' if card.estado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.estado }}
                                 </span>
                             </td>
-                            <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
-                            <td>${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            <td>${{ "%.2f"|format(card.cupoTotal) }}</td>
+                            <td>${{ "%.2f"|format(card.cupoDisponible) }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="{{ url_for('admin.ver_tarjeta', card_id=card.tarjetaId) }}" 

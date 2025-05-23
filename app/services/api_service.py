@@ -76,9 +76,9 @@ class APIService:
             response = requests.put(
                 f"{APIService.get_base_url()}/api/tarjetas/{card_id}",
                 json={
-                    "tarjetaEstado": data.get("tarjetaEstado"),
-                    "tarjetaCupoTotal": data.get("tarjetaCupoTotal"),
-                    "tarjetaCupoDisponible": data.get("tarjetaCupoDisponible")
+                    "tarjetaEstado": data.get("estado"),
+                    "tarjetaCupoTotal": float(data.get("cupo_total")),
+                    "tarjetaCupoDisponible": float(data.get("cupo_disponible"))
                 }
             )
             if response.status_code == 200:
@@ -111,11 +111,26 @@ class APIService:
 
     @staticmethod
     def get_all_clients() -> List[Dict]:
-        """Obtiene todos los clientes"""
+        """Obtiene todos los clientes únicos a partir de las tarjetas"""
         try:
-            response = requests.get(f"{APIService.get_base_url()}/clientes/lista")
+            response = requests.get(f"{APIService.get_base_url()}/api/tarjetas/con-clientes")
             if response.status_code == 200:
-                return response.json()
+                # Obtener todas las tarjetas con información de clientes
+                cards_data = response.json()
+                
+                # Crear un diccionario para almacenar clientes únicos por ID
+                unique_clients = {}
+                
+                # Extraer clientes únicos de las tarjetas
+                for card in cards_data:
+                    if 'cliente' in card:
+                        client = card['cliente']
+                        client_id = client['id']
+                        if client_id not in unique_clients:
+                            unique_clients[client_id] = client
+                
+                # Devolver la lista de clientes únicos
+                return list(unique_clients.values())
             return []
         except Exception as e:
             raise Exception(f"Error al obtener clientes: {str(e)}")
