@@ -35,8 +35,14 @@ def client_required(f):
 @client_required
 def dashboard():
     try:
-        # Obtener las tarjetas del cliente usando su email
-        cards = APIService.get_client_cards(current_user.email)
+        # Obtener el ID del cliente de la sesión
+        client_id = session.get('client_id')
+        if not client_id:
+            flash('Error: No se pudo identificar el cliente.', 'danger')
+            return redirect(url_for('auth.login'))
+
+        # Obtener las tarjetas del cliente usando su ID
+        cards = APIService.get_client_cards(client_id)
         return render_template('client/dashboard.html', cards=cards)
     except Exception as e:
         flash(f'Error al cargar las tarjetas: {str(e)}', 'danger')

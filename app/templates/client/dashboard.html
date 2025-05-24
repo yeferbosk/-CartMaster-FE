@@ -4,7 +4,13 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="mb-4">Mi Dashboard</h1>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Mi Dashboard</h1>
+        <a href="{{ url_for('cards.new_card') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>
+            Agregar Nueva Tarjeta
+        </a>
+    </div>
     
     <div class="row">
         <div class="col-md-4 mb-4">
@@ -36,8 +42,14 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">Mis Tarjetas</h5>
+            {% if not cards %}
+            <a href="{{ url_for('cards.new_card') }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus-circle me-1"></i>
+                Agregar Primera Tarjeta
+            </a>
+            {% endif %}
         </div>
         <div class="card-body">
             {% if cards %}
@@ -46,9 +58,12 @@
                     <thead>
                         <tr>
                             <th>Número</th>
+                            <th>Franquicia</th>
+                            <th>Fecha Vencimiento</th>
                             <th>Estado</th>
                             <th>Cupo Total</th>
                             <th>Cupo Disponible</th>
+                            <th>Cupo Utilizado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -56,6 +71,8 @@
                         {% for card in cards %}
                         <tr>
                             <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            <td>{{ card.tarjetaFranquicia }}</td>
+                            <td>{{ card.tarjetaFechaVencimiento }}</td>
                             <td>
                                 <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
                                     {{ card.tarjetaEstado }}
@@ -63,11 +80,27 @@
                             </td>
                             <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
                             <td>${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoUtilizado) }}</td>
                             <td>
-                                <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" 
-                                   class="btn btn-primary btn-sm">
-                                    <i class="fas fa-eye"></i> Ver Detalles
-                                </a>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" 
+                                       class="btn btn-primary btn-sm" 
+                                       title="Ver Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if card.tarjetaEstado == 'ACTIVO' %}
+                                    <form action="{{ url_for('cards.deactivate_card', card_id=card.tarjetaId) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Está seguro que desea desactivar esta tarjeta?');">
+                                        <button type="submit" 
+                                                class="btn btn-danger btn-sm" 
+                                                title="Desactivar Tarjeta">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -75,8 +108,10 @@
                 </table>
             </div>
             {% else %}
-            <div class="alert alert-info">
-                No tienes tarjetas registradas.
+            <div class="text-center py-5">
+                <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                <h4>No tienes tarjetas registradas</h4>
+                <p class="text-muted">¡Comienza agregando tu primera tarjeta!</p>
             </div>
             {% endif %}
         </div>
