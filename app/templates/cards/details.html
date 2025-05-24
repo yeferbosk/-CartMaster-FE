@@ -1,88 +1,128 @@
 {% extends "base.html" %}
 
-{% block title %}Card Details - CartMaster{% endblock %}
+{% block title %}Detalles de Tarjeta - CartMaster{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">Card Details</h3>
-                    <a href="{{ url_for('client.dashboard') }}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left"></i> Back to Dashboard
-                    </a>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalles de Tarjeta</h1>
+        <div>
+            <a href="{{ url_for('client.dashboard') }}" class="btn btn-outline-primary me-2">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver al Dashboard
+            </a>
+            <a href="{{ url_for('cards.mis_tarjetas') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-credit-card me-2"></i>
+                Mis Tarjetas
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card me-2"></i>
+                        Información de la Tarjeta
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h2 class="h5 mb-0">**** **** **** {{ card.tarjetaNumero[-4:] }}</h2>
+                            <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                {{ card.tarjetaEstado }}
+                            </span>
+                        </div>
+                        <p class="text-muted mb-0">{{ card.tarjetaFranquicia }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Fecha de Vencimiento</label>
+                        <p class="mb-0">{{ card.tarjetaFechaVencimiento }}</p>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">ID de Tarjeta</label>
+                        <p class="mb-0">#{{ card.tarjetaId }}</p>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5 class="card-title">
-                            <i class="fas fa-credit-card"></i>
-                            {{ card.tarjeta_franquicia }}
-                        </h5>
-                        <h6 class="card-subtitle mb-3 text-muted">
-                            **** **** **** {{ card.tarjeta_numero[-4:] }}
-                        </h6>
-                        <p><strong>Expiry Date:</strong> {{ card.tarjeta_fecha_vencimiento }}</p>
-                        <p>
-                            <strong>Status:</strong>
-                            <span class="badge {% if card.tarjeta_estado == 'ACTIVO' %}bg-success{% else %}bg-danger{% endif %}">
-                                {{ card.tarjeta_estado }}
-                            </span>
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h5 class="card-title">Credit Limits</h5>
-                                <div class="progress mb-3">
-                                    {% set percentage = (card.tarjeta_cupo_utilizado / card.tarjeta_cupo_total * 100) | round %}
-                                    <div class="progress-bar {% if percentage > 80 %}bg-danger{% elif percentage > 60 %}bg-warning{% else %}bg-success{% endif %}"
-                                         role="progressbar"
-                                         style="width: {{ percentage }}%"
-                                         aria-valuenow="{{ percentage }}"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100">
-                                        {{ percentage }}%
-                                    </div>
-                                </div>
-                                <p class="mb-1">
-                                    <strong>Total Limit:</strong>
-                                    ${{ "%.2f"|format(card.tarjeta_cupo_total) }}
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Available Credit:</strong>
-                                    ${{ "%.2f"|format(card.tarjeta_cupo_disponible) }}
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Used Credit:</strong>
-                                    ${{ "%.2f"|format(card.tarjeta_cupo_utilizado) }}
-                                </p>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-wallet me-2"></i>
+                        Información de Cupos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label text-muted">Uso del Cupo</label>
+                        <div class="progress mb-2" style="height: 20px;">
+                            {% set percentage = (card.tarjetaCupoUtilizado / card.tarjetaCupoTotal * 100)|round %}
+                            <div class="progress-bar {% if percentage > 80 %}bg-danger{% elif percentage > 60 %}bg-warning{% else %}bg-success{% endif %}"
+                                 role="progressbar"
+                                 style="width: {{ percentage }}%"
+                                 aria-valuenow="{{ percentage }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100">
+                                {{ percentage }}% Utilizado
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {% if current_user.is_admin %}
-                <div class="mt-4">
-                    <h5>Administrative Actions</h5>
-                    <form method="POST" action="{{ url_for('cards.update_card_status', card_id=card.tarjeta_id) }}"
-                          class="d-inline">
-                        <select name="status" class="form-select d-inline-block w-auto me-2">
-                            <option value="ACTIVO" {% if card.tarjeta_estado == 'ACTIVO' %}selected{% endif %}>
-                                Active
-                            </option>
-                            <option value="BLOQUEADO" {% if card.tarjeta_estado == 'BLOQUEADO' %}selected{% endif %}>
-                                Blocked
-                            </option>
-                        </select>
-                        <button type="submit" class="btn btn-primary">Update Status</button>
-                    </form>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted mb-2">Cupo Total</h6>
+                                    <h5 class="mb-0">${{ "%.2f"|format(card.tarjetaCupoTotal) }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted mb-2">Cupo Disponible</h6>
+                                    <h5 class="mb-0 text-success">${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-muted mb-2">Cupo Utilizado</h6>
+                                    <h5 class="mb-0 text-danger">${{ "%.2f"|format(card.tarjetaCupoUtilizado) }}</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>El cupo disponible se actualiza automáticamente según los movimientos realizados.</small>
+                    </div>
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips de Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
+</script>
+{% endblock %}
 {% endblock %} 

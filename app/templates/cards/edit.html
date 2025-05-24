@@ -1,14 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Nueva Tarjeta - CartMaster{% endblock %}
+{% block title %}Editar Tarjeta - CartMaster{% endblock %}
 
 {% block content %}
 <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Editar Tarjeta #{{ card.tarjetaId }}</h1>
+        <div>
+            <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Detalles
+            </a>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="mb-0">Agregar Nueva Tarjeta</h4>
+                    <h5 class="card-title mb-0">Formulario de Edición</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
@@ -21,6 +31,7 @@
                                    required 
                                    pattern="[0-9]{16}" 
                                    maxlength="16"
+                                   value="{{ card.tarjetaNumero }}"
                                    placeholder="1234567890123456">
                             <div class="form-text">Ingrese los 16 dígitos de la tarjeta sin espacios.</div>
                         </div>
@@ -33,6 +44,7 @@
                                    name="fecha_vencimiento" 
                                    required 
                                    pattern="(0[1-9]|1[0-2])/20[2-9][0-9]"
+                                   value="{{ card.tarjetaFechaVencimiento }}"
                                    placeholder="MM/YYYY">
                             <div class="form-text">Formato: MM/YYYY (ejemplo: 12/2025)</div>
                         </div>
@@ -41,36 +53,33 @@
                             <label for="franquicia" class="form-label">Franquicia</label>
                             <select class="form-select" id="franquicia" name="franquicia" required>
                                 <option value="">Seleccione una franquicia</option>
-                                <option value="VISA">VISA</option>
-                                <option value="MASTERCARD">MASTERCARD</option>
-                                <option value="AMERICAN_EXPRESS">AMERICAN EXPRESS</option>
+                                <option value="VISA" {% if card.tarjetaFranquicia == 'VISA' %}selected{% endif %}>VISA</option>
+                                <option value="MASTERCARD" {% if card.tarjetaFranquicia == 'MASTERCARD' %}selected{% endif %}>MASTERCARD</option>
+                                <option value="AMERICAN_EXPRESS" {% if card.tarjetaFranquicia == 'AMERICAN_EXPRESS' %}selected{% endif %}>AMERICAN EXPRESS</option>
                             </select>
                         </div>
 
                         <div class="mb-3">
-                            <label for="cupo_total" class="form-label">Cupo Total</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" 
-                                       class="form-control" 
-                                       id="cupo_total" 
-                                       name="cupo_total" 
-                                       required 
-                                       min="100000"
-                                       step="100000"
-                                       placeholder="1000000">
-                            </div>
-                            <div class="form-text">Monto mínimo: $100,000</div>
+                            <label for="estado" class="form-label">Estado</label>
+                            <select class="form-select" id="estado" name="estado" required>
+                                <option value="ACTIVO" {% if card.tarjetaEstado == 'ACTIVO' %}selected{% endif %}>ACTIVO</option>
+                                <option value="INACTIVO" {% if card.tarjetaEstado == 'INACTIVO' %}selected{% endif %}>INACTIVO</option>
+                            </select>
+                        </div>
+
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Los cupos de la tarjeta no pueden ser modificados desde aquí.
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-credit-card me-2"></i>
-                                Agregar Tarjeta
+                                <i class="fas fa-save me-2"></i>
+                                Guardar Cambios
                             </button>
-                            <a href="{{ url_for('client.dashboard') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>
-                                Volver al Dashboard
+                            <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                Cancelar
                             </a>
                         </div>
                     </form>

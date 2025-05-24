@@ -18,12 +18,12 @@ def login():
         try:
             user_data = APIService.login(email, password)
             if user_data:
-                user = User(email=email, role=user_data.get('role', 'CLIENTE'))
-                user.nombre = user_data.get('nombre', email)
+                user = User.from_json(user_data)
                 
                 # Guardar datos en la sesión
                 session['user_role'] = user.role
                 session['user_nombre'] = user.nombre
+                session['client_id'] = user.client_id  # Guardamos el ID del cliente en la sesión si existe
                 
                 login_user(user)
                 flash('Inicio de sesión exitoso', 'success')

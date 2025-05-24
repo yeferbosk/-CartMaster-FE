@@ -63,7 +63,7 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('client.dashboard') }}">
                                     <i class="fas fa-home me-1"></i>
-                                    Inicio
+                                    Dashboard
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -72,6 +72,14 @@
                                     Mis Tarjetas
                                 </a>
                             </li>
+                            {% if current_user.is_client %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('store.store') }}">
+                                    <i class="fas fa-shopping-cart me-2"></i>
+                                    Tienda
+                                </a>
+                            </li>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </ul>

@@ -46,6 +46,9 @@ app.register_blueprint(client.bp)
 from app.routes import cards
 app.register_blueprint(cards.bp)
 
+from app.routes import store
+app.register_blueprint(store.bp)
+
 @app.route('/')
 def index():
     if not current_user.is_authenticated:

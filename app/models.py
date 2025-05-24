@@ -6,6 +6,7 @@ class User(UserMixin):
         self.role = role
         self.id = email  # Usando el email como ID único
         self.nombre = None  # Añadido para almacenar el nombre del usuario
+        self.client_id = None  # Añadido para almacenar el ID del cliente
 
     @property
     def is_admin(self):
@@ -33,10 +34,11 @@ class User(UserMixin):
     @staticmethod
     def from_json(json_data):
         user = User(
-            email=json_data.get('clienteCorreo') or json_data.get('adminCorreo'),
-            role='ADMINISTRADOR' if 'adminId' in json_data else 'CLIENTE'
+            email=json_data.get('email'),
+            role=json_data.get('role', 'CLIENTE')
         )
-        user.nombre = json_data.get('clienteNombre') or json_data.get('adminNombre')
+        user.nombre = json_data.get('nombre')
+        user.client_id = json_data.get('client_id')  # Añadido para manejar el ID del cliente
         return user
 
 class Card:

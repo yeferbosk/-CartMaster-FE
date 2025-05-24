@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Tienda - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Tienda CartMaster</h1>
+    </div>
+
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <img src="{{ url_for('static', filename='img/' + product.image) }}" 
+                     class="card-img-top p-3" 
+                     alt="{{ product.name }}"
+                     style="height: 300px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">
+                        <strong class="text-primary h4">${{ "%.2f"|format(product.price) }} COP</strong>
+                    </p>
+                    <button type="button" 
+                            class="btn btn-primary w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#purchaseModal"
+                            data-product-id="{{ product.id }}"
+                            data-product-name="{{ product.name }}"
+                            data-product-price="{{ product.price }}">
+                        <i class="fas fa-shopping-cart me-2"></i>
+                        Comprar
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal de Compra -->
+<div class="modal fade" id="purchaseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Compra</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="purchaseForm" action="{{ url_for('store.purchase') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="product_id" id="productId">
+                    <input type="hidden" name="product_price" id="productPrice">
+                    
+                    <p>Estás a punto de comprar: <strong id="productName"></strong></p>
+                    <p>Precio: $<span id="displayPrice"></span> COP</p>
+
+                    <div class="mb-3">
+                        <label for="cardSelect" class="form-label">Selecciona tu Tarjeta</label>
+                        <select class="form-select" id="cardSelect" name="card_id" required>
+                            <option value="">Selecciona una tarjeta</option>
+                            {% for card in cards %}
+                            {% if card.tarjetaEstado == 'ACTIVO' %}
+                            <option value="{{ card.tarjetaId }}" 
+                                    data-available="{{ card.tarjetaCupoDisponible }}">
+                                **** {{ card.tarjetaNumero[-4:] }} - 
+                                Disponible: ${{ "%.2f"|format(card.tarjetaCupoDisponible) }}
+                            </option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Cupo disponible en la tarjeta seleccionada: 
+                        $<span id="availableLimit">0.00</span> COP
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="confirmPurchase">
+                        <i class="fas fa-check me-2"></i>
+                        Confirmar Compra
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const purchaseModal = document.getElementById('purchaseModal');
+    const cardSelect = document.getElementById('cardSelect');
+    const availableLimit = document.getElementById('availableLimit');
+    const confirmPurchase = document.getElementById('confirmPurchase');
+    let currentPrice = 0;
+
+    purchaseModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        const productPrice = button.getAttribute('data-product-price');
+        currentPrice = parseFloat(productPrice);
+
+        document.getElementById('productId').value = productId;
+        document.getElementById('productName').textContent = productName;
+        document.getElementById('productPrice').value = productPrice;
+        document.getElementById('displayPrice').textContent = parseFloat(productPrice).toFixed(2);
+
+        // Reset select
+        cardSelect.value = '';
+        availableLimit.textContent = '0.00';
+        confirmPurchase.disabled = true;
+    });
+
+    cardSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            const available = parseFloat(selectedOption.getAttribute('data-available'));
+            availableLimit.textContent = available.toFixed(2);
+            confirmPurchase.disabled = available < currentPrice;
+            
+            if (available < currentPrice) {
+                alert('El cupo disponible en esta tarjeta es insuficiente para realizar la compra.');
+            }
+        } else {
+            availableLimit.textContent = '0.00';
+            confirmPurchase.disabled = true;
+        }
+    });
+
+    document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+        const selectedOption = cardSelect.options[cardSelect.selectedIndex];
+        if (selectedOption.value) {
+            const available = parseFloat(selectedOption.getAttribute('data-available'));
+            if (available < currentPrice) {
+                e.preventDefault();
+                alert('El cupo disponible en esta tarjeta es insuficiente para realizar la compra.');
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

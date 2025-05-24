@@ -6,70 +6,93 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Mis Tarjetas</h1>
+        <a href="{{ url_for('cards.new_card') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i>
+            Agregar Nueva Tarjeta
+        </a>
     </div>
 
-    {% if cards %}
-    <div class="row">
-        {% for card in cards %}
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-credit-card me-2"></i>
-                        Tarjeta #{{ card.tarjetaId }}
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <h6 class="card-subtitle mb-3 text-muted">
-                        **** **** **** {{ card.tarjetaNumero[-4:] }}
-                    </h6>
-                    
-                    <p class="mb-2">
-                        <strong>Estado:</strong>
-                        <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
-                            {{ card.tarjetaEstado }}
-                        </span>
-                    </p>
-                    
-                    <p class="mb-2">
-                        <strong>Cupo Total:</strong>
-                        ${{ "%.2f"|format(card.tarjetaCupoTotal) }}
-                    </p>
-                    
-                    <p class="mb-2">
-                        <strong>Cupo Disponible:</strong>
-                        ${{ "%.2f"|format(card.tarjetaCupoDisponible) }}
-                    </p>
-                    
-                    <div class="progress mb-3">
-                        {% set porcentaje_usado = ((card.tarjetaCupoTotal - card.tarjetaCupoDisponible) / card.tarjetaCupoTotal * 100)|round %}
-                        <div class="progress-bar {% if porcentaje_usado > 80 %}bg-danger{% elif porcentaje_usado > 60 %}bg-warning{% else %}bg-success{% endif %}"
-                             role="progressbar"
-                             style="width: {{ porcentaje_usado }}%"
-                             aria-valuenow="{{ porcentaje_usado }}"
-                             aria-valuemin="0"
-                             aria-valuemax="100">
-                            {{ porcentaje_usado }}% Utilizado
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" 
-                           class="btn btn-primary">
-                            <i class="fas fa-eye me-2"></i>
-                            Ver Detalles
-                        </a>
-                    </div>
-                </div>
+    <div class="card">
+        <div class="card-body">
+            {% if cards %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Franquicia</th>
+                            <th>Fecha Vencimiento</th>
+                            <th>Estado</th>
+                            <th>Cupo Total</th>
+                            <th>Cupo Disponible</th>
+                            <th>Cupo Utilizado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for card in cards %}
+                        <tr>
+                            <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            <td>{{ card.tarjetaFranquicia }}</td>
+                            <td>{{ card.tarjetaFechaVencimiento }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if card.tarjetaEstado == 'ACTIVO' else 'warning' }}">
+                                    {{ card.tarjetaEstado }}
+                                </span>
+                            </td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            <td>${{ "%.2f"|format(card.tarjetaCupoUtilizado) }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('cards.card_details', card_id=card.tarjetaId) }}" 
+                                       class="btn btn-primary btn-sm"
+                                       title="Ver Detalles">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if card.tarjetaEstado == 'ACTIVO' %}
+                                    <form action="{{ url_for('cards.deactivate_card', card_id=card.tarjetaId) }}" 
+                                          method="POST" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Está seguro que desea desactivar esta tarjeta?');">
+                                        <button type="submit" 
+                                                class="btn btn-danger btn-sm"
+                                                title="Desactivar Tarjeta">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-credit-card fa-4x text-muted mb-3"></i>
+                <h4>No tienes tarjetas registradas</h4>
+                <p class="text-muted">¡Comienza agregando tu primera tarjeta!</p>
+                <a href="{{ url_for('cards.new_card') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    Agregar Primera Tarjeta
+                </a>
+            </div>
+            {% endif %}
         </div>
-        {% endfor %}
     </div>
-    {% else %}
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
-        No tienes tarjetas registradas.
-    </div>
-    {% endif %}
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips de Bootstrap si los usamos
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+});
+</script>
+{% endblock %}
 {% endblock %} 

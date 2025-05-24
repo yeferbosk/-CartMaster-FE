@@ -24,11 +24,15 @@ class APIService:
             if not response.text:
                 raise ValueError("El servidor devolvió una respuesta vacía")
             
-            role = response.text.strip()
+            response_data = response.json() if response.text else {}
+            role = response_data.get('tipo', 'CLIENTE')
+            client_id = response_data.get('clienteId')  # Puede ser None para administradores
+            
             return {
                 'role': role,
                 'nombre': email,
-                'email': email
+                'email': email,
+                'client_id': client_id  # Incluimos el ID del cliente si existe
             }
             
         except Exception as e:
@@ -52,17 +56,20 @@ class APIService:
         """Obtiene una tarjeta específica por ID"""
         try:
             response = requests.get(f"{APIService.get_base_url()}/api/tarjetas/{card_id}")
-            if response.status_code == 200:
+            if response.status_code == 200 and response.text:
                 return response.json()
-            return None
+            elif response.status_code == 404:
+                return None
+            else:
+                raise Exception(f"Error del servidor: {response.status_code}")
         except Exception as e:
             raise Exception(f"Error al obtener tarjeta {card_id}: {str(e)}")
 
     @staticmethod
     def get_client_cards(client_id: int) -> List[Dict]:
-        """Obtiene todas las tarjetas de un cliente específico"""
+        """Obtiene todas las tarjetas de un cliente específico usando su ID"""
         try:
-            response = requests.get(f"{APIService.get_base_url()}/api/tarjetas/cliente/{client_id}")
+            response = requests.get(f"{APIService.get_base_url()}/clientes/{client_id}/tarjetas")
             if response.status_code == 200:
                 return response.json()
             return []
@@ -106,6 +113,89 @@ class APIService:
             return []
         except Exception as e:
             raise Exception(f"Error al obtener tarjetas con clientes: {str(e)}")
+
+    @staticmethod
+    def create_card(client_id: int, card_data: Dict) -> Optional[Dict]:
+        """Crea una nueva tarjeta para un cliente específico"""
+        try:
+            response = requests.post(
+                f"{APIService.get_base_url()}/api/tarjetas/crear/{client_id}",
+                json={
+                    "tarjetaNumero": card_data['numero'],
+                    "tarjetaFechaVencimiento": card_data['fecha_vencimiento'],
+                    "tarjetaFranquicia": card_data['franquicia'],
+                    "tarjetaEstado": "ACTIVO",
+                    "tarjetaCupoTotal": float(card_data['cupo_total']),
+                    "tarjetaCupoDisponible": float(card_data['cupo_total'])  # Inicialmente igual al cupo total
+                }
+            )
+            if response.status_code == 201:
+                # Asegurarse de que la respuesta tenga contenido
+                if response.text:
+                    return response.json()
+                else:
+                    raise Exception("El servidor no devolvió datos de la tarjeta creada")
+            elif response.status_code == 400:
+                raise Exception("Datos de tarjeta inválidos")
+            elif response.status_code == 404:
+                raise Exception("Cliente no encontrado")
+            else:
+                raise Exception(f"Error del servidor: {response.status_code}")
+            return None
+        except requests.exceptions.RequestException as e:
+            raise Exception(f"Error de conexión al crear tarjeta: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Error al crear tarjeta: {str(e)}")
+
+    @staticmethod
+    def update_card_general(card_id: int, card_data: Dict) -> Optional[Dict]:
+        """Actualiza los datos generales de una tarjeta"""
+        try:
+            response = requests.put(
+                f"{APIService.get_base_url()}/api/tarjetas/actualizar_generales/{card_id}",
+                json={
+                    "tarjetaNumero": card_data['numero'],
+                    "tarjetaFechaVencimiento": card_data['fecha_vencimiento'],
+                    "tarjetaFranquicia": card_data['franquicia'],
+                    "tarjetaEstado": card_data['estado']
+                }
+            )
+            if response.status_code == 200 and response.text:
+                return response.json()
+            elif response.status_code == 404:
+                return None
+            else:
+                raise Exception(f"Error del servidor: {response.status_code}")
+        except Exception as e:
+            raise Exception(f"Error al actualizar tarjeta {card_id}: {str(e)}")
+
+    @staticmethod
+    def deactivate_card(card_id: int) -> bool:
+        """Desactiva una tarjeta"""
+        try:
+            response = requests.delete(f"{APIService.get_base_url()}/api/tarjetas/{card_id}")
+            return response.status_code == 200
+        except Exception as e:
+            raise Exception(f"Error al desactivar la tarjeta {card_id}: {str(e)}")
+
+    @staticmethod
+    def update_card_available_limit(card_id: int, available_limit: float) -> Optional[Dict]:
+        """Actualiza el cupo disponible de una tarjeta"""
+        try:
+            response = requests.put(
+                f"{APIService.get_base_url()}/api/tarjetas/actualizar_cupo_disponible/{card_id}",
+                json={
+                    "tarjetaCupoDisponible": available_limit
+                }
+            )
+            if response.status_code == 200 and response.text:
+                return response.json()
+            elif response.status_code == 404:
+                return None
+            else:
+                raise Exception(f"Error del servidor: {response.status_code}")
+        except Exception as e:
+            raise Exception(f"Error al actualizar cupo de tarjeta {card_id}: {str(e)}")
 
     # Endpoints de Clientes
 

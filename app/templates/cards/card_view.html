@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Tarjeta - CartMaster{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Detalles de la Tarjeta</h1>
+        <div>
+            <a href="{{ url_for('cards.edit_card', card_id=card.tarjetaId) }}" class="btn btn-warning me-2">
+                <i class="fas fa-edit me-2"></i>
+                Editar Tarjeta
+            </a>
+            <a href="{{ url_for('client.dashboard') }}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-home me-2"></i>
+                Dashboard
+            </a>
+            <a href="{{ url_for('cards.mis_tarjetas') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Mis Tarjetas
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <!-- Tarjeta de Crédito Visual -->
+            <div class="credit-card mb-4 p-4 rounded" 
+                 style="background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d); color: white;">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h2 class="h4 mb-3">{{ card.tarjetaFranquicia }}</h2>
+                        <div class="credit-card-number h3">
+                            **** **** **** {{ card.tarjetaNumero[-4:] }}
+                        </div>
+                    </div>
+                    <span class="badge {% if card.tarjetaEstado == 'ACTIVO' %}bg-success{% else %}bg-warning{% endif %} p-2">
+                        {{ card.tarjetaEstado }}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <div>
+                        <small class="text-white-50">Fecha de Vencimiento</small>
+                        <div>{{ card.tarjetaFechaVencimiento }}</div>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-white-50">ID de Tarjeta</small>
+                        <div>#{{ card.tarjetaId }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información de Cupos -->
+            <h3 class="h5 mb-4">Información de Cupos</h3>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Cupo Total</h6>
+                            <h4 class="card-title mb-0">${{ "%.2f"|format(card.tarjetaCupoTotal) }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Cupo Disponible</h6>
+                            <h4 class="card-title mb-0 text-success">${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light h-100">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">Cupo Utilizado</h6>
+                            <h4 class="card-title mb-0 text-danger">${{ "%.2f"|format(card.tarjetaCupoUtilizado) }}</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Barra de Progreso de Uso -->
+            <div class="mb-4">
+                <h6 class="mb-3">Uso del Cupo</h6>
+                <div class="progress" style="height: 25px;">
+                    {% set percentage = (card.tarjetaCupoUtilizado / card.tarjetaCupoTotal * 100)|round %}
+                    <div class="progress-bar {% if percentage > 80 %}bg-danger{% elif percentage > 60 %}bg-warning{% else %}bg-success{% endif %}"
+                         role="progressbar"
+                         style="width: {{ percentage }}%"
+                         aria-valuenow="{{ percentage }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ percentage }}% Utilizado
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detalles Adicionales -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="h5 mb-3">Detalles de la Tarjeta</h3>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="text-muted">Número de Tarjeta:</th>
+                                <td>**** **** **** {{ card.tarjetaNumero[-4:] }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Franquicia:</th>
+                                <td>{{ card.tarjetaFranquicia }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Fecha de Vencimiento:</th>
+                                <td>{{ card.tarjetaFechaVencimiento }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Estado:</th>
+                                <td>
+                                    <span class="badge {% if card.tarjetaEstado == 'ACTIVO' %}bg-success{% else %}bg-warning{% endif %}">
+                                        {{ card.tarjetaEstado }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">ID de Tarjeta:</th>
+                                <td>#{{ card.tarjetaId }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h3 class="h5 mb-3">Información de Cupos</h3>
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="text-muted">Cupo Total:</th>
+                                <td>${{ "%.2f"|format(card.tarjetaCupoTotal) }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Cupo Disponible:</th>
+                                <td class="text-success">${{ "%.2f"|format(card.tarjetaCupoDisponible) }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Cupo Utilizado:</th>
+                                <td class="text-danger">${{ "%.2f"|format(card.tarjetaCupoUtilizado) }}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="text-muted">Porcentaje Utilizado:</th>
+                                <td>{{ percentage }}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+.credit-card {
+    background-color: #1a1a1a;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.credit-card-number {
+    letter-spacing: 2px;
+    font-family: monospace;
+}
+</style>
+{% endblock %}
+{% endblock %} 
