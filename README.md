@@ -1,112 +1,95 @@
 # CartMaster Frontend
 
-Aplicación frontend desarrollada en Flask para la gestión de tarjetas de crédito. Esta aplicación trabaja en conjunto con el backend CartMaster desarrollado en Spring Boot.
+Sistema robusto de gestión de tarjetas de crédito construido con Flask, que proporciona una interfaz de usuario segura e intuitiva para interactuar con el servicio backend de CartMaster.
 
-## Características
+## 📋 Descripción General
 
-- Autenticación de usuarios (clientes y administradores)
-- Gestión de tarjetas de crédito
-- Seguimiento de límites de crédito
-- Gestión del estado de las tarjetas
-- Diseño responsivo con Bootstrap 5
+CartMaster Frontend es una aplicación web basada en Flask que sirve como interfaz de usuario para operaciones de gestión de tarjetas de crédito. Proporciona una forma segura y eficiente de manejar tareas relacionadas con tarjetas de crédito mientras mantiene una experiencia de usuario limpia y moderna.
 
-## Requisitos Previos
+## 🔧 Stack Tecnológico
+
+- **Framework:** Flask 3.0.2
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Autenticación:** Flask-Login 0.6.3
+- **Formularios:** Flask-WTF 1.2.1
+- **Cliente HTTP:** Requests 2.31.0
+- **Gestión de Entorno:** python-dotenv 1.0.1
+- **Gestión de Tiempo:** Flask-Moment 1.0.6
+
+## 🚀 Comenzando
+
+### Requisitos Previos
 
 - Python 3.8 o superior
 - pip (gestor de paquetes de Python)
-- Backend CartMaster en ejecución (aplicación Spring Boot)
+- Git
 
-## Instalación
+### Instalación
 
-1. Clonar el repositorio:
+1. **Clonar el repositorio**
 ```bash
-git clone <repository-url>
-cd cartmaster-frontend
+git clone https://github.com/AFlazaroo/CartMaster-FED.git
+cd CartMaster-FE
 ```
 
-2. Crear un entorno virtual:
+2. **Crear y activar el entorno virtual**
 ```bash
+# Windows
 python -m venv venv
-```
-
-3. Activar el entorno virtual:
-- Windows:
-```bash
 venv\Scripts\activate
-```
-- Unix/MacOS:
-```bash
+
+# Linux/MacOS
+python3 -m venv venv
 source venv/bin/activate
 ```
 
-4. Instalar dependencias:
+3. **Instalar dependencias**
 ```bash
 pip install -r requirements.txt
 ```
 
-5. Crear un archivo `.env` en el directorio raíz con el siguiente contenido:
-```
-FLASK_APP=app
-FLASK_ENV=development
-SECRET_KEY=tu-clave-secreta-aqui
-BACKEND_URL=http://localhost:8080
-```
+### Ejecutar la Aplicación
 
-## Ejecutar la Aplicación
-
-1. Asegúrate de que el backend CartMaster esté en ejecución
-
-2. Iniciar el servidor de desarrollo Flask:
 ```bash
-flask run
-```
+# Modo desarrollo
+python wsgi.py
 
-3. Acceder a la aplicación en `http://localhost:5000`
+La aplicación estará disponible en `http://localhost:5000`
 
-## Uso
-
-1. Registra una nueva cuenta o inicia sesión con credenciales existentes
-2. Añade y gestiona tarjetas de crédito
-3. Visualiza límites de crédito y estado de las tarjetas
-4. Los administradores pueden gestionar los estados de las tarjetas
-
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
-cartmaster-frontend/
-├── app/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── routes/
-│   │   ├── auth.py
-│   │   ├── cards.py
-│   │   └── client.py
-│   └── templates/
-│       ├── auth/
-│       │   ├── login.html
-│       │   └── register.html
-│       ├── cards/
-│       │   ├── details.html
-│       │   └── new.html
-│       ├── client/
-│       │   ├── dashboard.html
-│       │   └── profile.html
-│       └── base.html
-├── requirements.txt
-└── README.md
+CartMaster-FE/
+├── app/                    # Paquete de la aplicación
+│   ├── __init__.py        # Inicialización de la app
+│   ├── models.py          # Modelos de base de datos
+│   ├── decorators.py      # Decoradores personalizados
+│   ├── routes/            # Manejadores de rutas
+│   ├── services/          # Lógica de negocio
+│   ├── static/            # Archivos estáticos (CSS, JS, imágenes)
+│   └── templates/         # Plantillas Jinja2
+├── venv/                  # Entorno virtual
+
+├── requirements.txt       # Dependencias Python
+├── README.md             # Documentación del proyecto
+└── wsgi.py               # Punto de entrada WSGI
 ```
 
-## Consideraciones de Seguridad
+## 🛠️ Características
 
-- Todas las contraseñas son manejadas de forma segura por el backend
-- La gestión de sesiones es manejada por Flask-Login
-- Protección CSRF habilitada por defecto
-- Los datos sensibles no se almacenan en el frontend
+- **Autenticación de Usuario**
+  - Inicio de sesión y registro seguros
+  - Gestión de sesiones
 
-## Contribuir
+- **Gestión de Tarjetas**
+  - Visualización y gestión de tarjetas de crédito
+  - Activación/desactivación de tarjetas
+  - Gestión de límites en administrador
 
-1. Haz un fork del repositorio
-2. Crea una rama para tu funcionalidad
-3. Realiza tus cambios
-4. Sube los cambios a tu rama
-5. Crea un Pull Request 
+## 📮 Contacto
+
+Para soporte o consultas, por favor contáctanos:
+- Email: yaacosta@unbosque.edu.co
+
+---
+Hecho con ❤️ por el Equipo CartMaster (Lazaro y yeferson)
